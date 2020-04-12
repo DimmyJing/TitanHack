@@ -18,6 +18,9 @@ import { Camera } from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
 
 
+const isMobile = window.innerWidth <= 500;
+
+
 function useWindowSize() {
   const isClient = typeof window === 'object';
 
@@ -37,9 +40,8 @@ function useWindowSize() {
     }
     
     function handleResize() {
-      let size = getSize();
-      alert(JSON.stringify(size));
-      setWindowSize(size);
+      if (!isMobile)
+        setWindowSize(getSize());
     }
 
     window.addEventListener('resize', handleResize);
@@ -123,92 +125,6 @@ function App() {
           {dataURI ? <div>
             <img src={dataURI} style={{width: cameraWidth, height: cameraHeight, left: cameraShift}} alt=""/>
           </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={takePhoto} idealResolution={{width: 512, height: 384}}/></div>}
-          <span>
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-            Hello World
-          </span>
         </div>) : <div/>}
     </div>
   );
