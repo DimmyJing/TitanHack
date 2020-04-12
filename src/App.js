@@ -12,10 +12,23 @@ import face2quote from './assets/face2quote.png';
 import banner from './assets/banner.png';
 import cameraBorder from './assets/cameraborder.png';
 import backButton from './assets/backbutton.png';
+import glassInfo from './assets/glassinfo.png';
+import paperInfo from './assets/paperinfo.png';
+import metalInfo from './assets/metalinfo.png';
+import cardboardInfo from './assets/cardboardinfo.png';
+import plasticInfo from './assets/plasticinfo.png';
+import trashInfo from './assets/trashinfo.png';
+import retakeButton from './assets/retakebutton.png';
+import DIYLabel from './assets/diylabel.png';
+import googleMaps from './assets/googlemaps.png';
+
+// Other stuff
+import DIY from './DIY';
 
 // Extern Libraries
 import { Camera } from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
+import request from 'request';
 
 
 const isMobile = window.innerWidth <= 500;
@@ -46,11 +59,10 @@ function useWindowSize() {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [getSize, isClient]); // Empty array ensures that effect is only run on mount and unmount
+  }, [getSize, isClient]);
 
   return windowSize;
 }
-
 
 
 function App() {
@@ -60,7 +72,7 @@ function App() {
   let faceShiftHeight = (size.height - 600) / 2;
   let containerStyle = {
     backgroundColor: "#8db283",
-    height: size.height * 2,
+    minHeight: size.height + (isMobile ? 100 : 0),
     width: size.width,
   }
   let cameraWidth = Math.min(size.height / 384 * 512, size.width);
@@ -69,22 +81,87 @@ function App() {
 
   const [screenID, setScreenID] = useState(0);
   const [dataURI, setDataURI] = useState('');
+  const [infographicURI, setInfographicURI] = useState('');
+  const [DIYLink, setDIYLink] = useState('');
+  const [DIYImage, setDIYImage] = useState('');
+  const [longitude, setLongitude] = useState(0);
+  const [latitude, setLatitude] = useState(0);
+  const [addr, setAddr] = useState('');
 
   let topShift = -25;
   let botShift = 10;
 
+  let geolocationSuccess = function(position) {
+    setLongitude(position.coords.longitude);
+    setLatitude(position.coords.latitude);
+    console.log("Geolocation success!\n\nlat = " + latitude + "\nlng = " + longitude);
+  };
+
+  let tryAPIGeolocation = function() {
+    request.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyCmtiX2CD35ks8H5W5Kj0wJTlekWLIy3I8", function(success) {
+      geolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
+    }).fail(function(err) {
+      alert("API Geolocation error! \n\n"+JSON.stringify(err));
+    });
+  };
+
+  let tryGeolocation = function() {
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(geolocationSuccess, tryAPIGeolocation,
+        {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true});
+    else
+      tryAPIGeolocation();
+  };
+
+  tryGeolocation();
+
   function takePhoto(dataUri) {
     setDataURI(dataUri);
 
-    var xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
+      let state = '';
       if (xhr.readyState === XMLHttpRequest.DONE)
-          alert(xhr.responseText);
+        state = xhr.responseText;
+      if (state === "cardboard")
+        setInfographicURI(cardboardInfo);
+      else if (state === "glass")
+        setInfographicURI(glassInfo);
+      else if (state === "metal")
+        setInfographicURI(metalInfo);
+      else if (state === "paper")
+        setInfographicURI(paperInfo);
+      else if (state === "plastic")
+        setInfographicURI(plasticInfo);
+      else if (state === "trash")
+        setInfographicURI(trashInfo);
+
+      if (state) {
+        let randomIndex = Math.floor(Math.random() * 10);
+        let [link, image] = DIY[state][randomIndex];
+        setDIYLink(link);
+        setDIYImage(image);
+      }
+      
+      let locXHR = new XMLHttpRequest();
+      locXHR.onreadystatechange = function() {
+        let text = locXHR.responseText;
+        console.log(text)
+        setAddr(text);
+      }
+      locXHR.open("GET", "http://127.0.0.1:5000/getnearestdisposal/" + longitude + ":" + latitude + ":" + state);
+      locXHR.setRequestHeader('Content-Type', 'application/json');
+      if (state)
+        locXHR.send();
     }
     xhr.open("POST", "http://127.0.0.1:5000/predictimage", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(dataUri);
   }
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [screenID]);
 
   return (
     <div className="App" style={containerStyle}>
@@ -118,14 +195,26 @@ function App() {
             <button style={{borderRadius: "50%", width: 220, height: 210, background: "transparent", border: "none", outline: "none"}} onClick={() => setScreenID(2)}></button>
           </div>
         </div>) : <div/>}
-      {(screenID === 1 || screenID === 2) ? (
-        <div>
+      {(screenID === 1 || screenID === 2) ? <div>
           <img src={cameraBorder} style={{position: "absolute", width: cameraWidth, height: cameraHeight, left: cameraShift, zIndex: 1}} alt=""/>
-          <img src={backButton} style={{position: "absolute", width: 80, height: 60, left: cameraShift + 30, top: 25, zIndex: 1}} onClick={() => setScreenID(0)} alt=""/>
+          <img src={backButton} style={{position: "absolute", width: 80, height: 60, left: cameraShift + 30 / 414 * cameraWidth, top: 25 / 310 * cameraHeight, zIndex: 1}} onClick={() => setScreenID(0)} alt=""/>
+          <img src={retakeButton} style={{position: "absolute", width: 80, height: 60, left: cameraShift + cameraWidth - 100 / 414 * cameraWidth, top: 25 / 310 * cameraHeight, zIndex: 1}} onClick={() => setDataURI('')} alt=""/>
           {dataURI ? <div>
             <img src={dataURI} style={{width: cameraWidth, height: cameraHeight, left: cameraShift}} alt=""/>
+            <img src={infographicURI} style={{width: size.width, marginTop: 20}} alt=""/>
           </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={takePhoto} idealResolution={{width: 512, height: 384}}/></div>}
-        </div>) : <div/>}
+        </div> : <div/>}
+      {(screenID === 1 && addr) ? <div>
+          <a href={"https://maps.google.com/?q=" + addr}>
+            <img src={googleMaps} style={{width: size.width}} alt=""/>
+          </a>
+        </div> : <div/>}
+      {(screenID === 2 && DIYImage) ? <div>
+          <a href={DIYLink}>
+            <img src={DIYLabel} style={{width: size.width}} alt=""/>
+            <img src={DIYImage} style={{width: size.width}} alt=""/>
+          </a>
+        </div> : <div/>}
     </div>
   );
 }
