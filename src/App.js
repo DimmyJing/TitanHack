@@ -37,7 +37,9 @@ function useWindowSize() {
     }
     
     function handleResize() {
-      setWindowSize(getSize());
+      let size = getSize();
+      alert(JSON.stringify(size));
+      setWindowSize(size);
     }
 
     window.addEventListener('resize', handleResize);
@@ -48,6 +50,7 @@ function useWindowSize() {
 }
 
 
+
 function App() {
   const size = useWindowSize();
   // let imageShiftWidth = Math.max(0, size.height / 17 * 10 - size.width);
@@ -55,7 +58,7 @@ function App() {
   let faceShiftHeight = (size.height - 600) / 2;
   let containerStyle = {
     backgroundColor: "#8db283",
-    height: size.height,
+    height: size.height * 2,
     width: size.width,
   }
   let cameraWidth = Math.min(size.height / 384 * 512, size.width);
@@ -67,6 +70,19 @@ function App() {
 
   let topShift = -25;
   let botShift = 10;
+
+  function takePhoto(dataUri) {
+    setDataURI(dataUri);
+
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE)
+          alert(xhr.responseText);
+    }
+    xhr.open("POST", "http://127.0.0.1:5000/predictimage", true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(dataUri);
+  }
 
   return (
     <div className="App" style={containerStyle}>
@@ -106,7 +122,7 @@ function App() {
           <img src={backButton} style={{position: "absolute", width: 80, height: 60, left: cameraShift + 30, top: 25, zIndex: 1}} onClick={() => setScreenID(0)} alt=""/>
           {dataURI ? <div>
             <img src={dataURI} style={{width: cameraWidth, height: cameraHeight, left: cameraShift}} alt=""/>
-          </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={(dataUri) => setDataURI(dataUri)} idealResolution={{width: 512, height: 384}}/></div>}
+          </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={takePhoto} idealResolution={{width: 512, height: 384}}/></div>}
           <span>
             Hello World
             Hello World
