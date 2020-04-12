@@ -100,8 +100,6 @@ function App() {
   let tryAPIGeolocation = function() {
     request.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyCmtiX2CD35ks8H5W5Kj0wJTlekWLIy3I8", function(success) {
       geolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
-    }).fail(function(err) {
-      alert("API Geolocation error! \n\n"+JSON.stringify(err));
     });
   };
 
@@ -136,7 +134,7 @@ function App() {
       else if (state === "trash")
         setInfographicURI(trashInfo);
 
-      if (state) {
+      if (state && state !== "trash") {
         let randomIndex = Math.floor(Math.random() * 10);
         let [link, image] = DIY[state][randomIndex];
         setDIYLink(link);
@@ -149,12 +147,12 @@ function App() {
         console.log(text)
         setAddr(text);
       }
-      locXHR.open("GET", "http://127.0.0.1:5000/getnearestdisposal/" + longitude + ":" + latitude + ":" + state);
+      locXHR.open("GET", "http://titanhack.dimmyjing.com:5000/getnearestdisposal/" + longitude + ":" + latitude + ":" + state);
       locXHR.setRequestHeader('Content-Type', 'application/json');
       if (state)
         locXHR.send();
     }
-    xhr.open("POST", "http://127.0.0.1:5000/predictimage", true);
+    xhr.open("POST", "http://titanhack.dimmyjing.com:5000/predictimage", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(dataUri);
   }
