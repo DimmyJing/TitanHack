@@ -26,7 +26,7 @@ import googleMaps from './assets/googlemaps.png';
 import DIY from './DIY';
 
 // Extern Libraries
-import { Camera } from 'react-html5-camera-photo';
+import Camera, {FACING_MODES} from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
 import request from 'request';
 
@@ -147,12 +147,12 @@ function App() {
         console.log(text)
         setAddr(text);
       }
-      locXHR.open("GET", "http://titanhack.dimmyjing.com:5000/getnearestdisposal/" + longitude + ":" + latitude + ":" + state);
+      locXHR.open("GET", "https://af2d7ea9.ngrok.io/getnearestdisposal/" + longitude + ":" + latitude + ":" + state);
       locXHR.setRequestHeader('Content-Type', 'application/json');
       if (state)
         locXHR.send();
     }
-    xhr.open("POST", "http://titanhack.dimmyjing.com:5000/predictimage", true);
+    xhr.open("POST", "https://af2d7ea9.ngrok.io/predictimage", true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(dataUri);
   }
@@ -200,7 +200,7 @@ function App() {
           {dataURI ? <div>
             <img src={dataURI} style={{width: cameraWidth, height: cameraHeight, left: cameraShift}} alt=""/>
             <img src={infographicURI} style={{width: size.width, marginTop: 20}} alt=""/>
-          </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={takePhoto} idealResolution={{width: 512, height: 384}}/></div>}
+          </div> : <div style={{position: "relative", width: cameraWidth, height: cameraHeight, left: cameraShift}}><Camera onTakePhotoAnimationDone={takePhoto} idealResolution={{width: 512, height: 384}} idealFacingMode = {FACING_MODES.ENVIRONMENT}/></div>}
         </div> : <div/>}
       {(screenID === 1 && addr) ? <div>
           <a href={"https://maps.google.com/?q=" + addr}>
